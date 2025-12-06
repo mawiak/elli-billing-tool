@@ -1,0 +1,4 @@
+elli-client
+python-dotenv
+PyPDF2
+reportlab

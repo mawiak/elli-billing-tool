@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "elli-billing-tool"
+version = "0.1.0"
+description = "Automated charging report generation for company car reimbursement"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "elli-client",
+    "python-dotenv",
+    "PyPDF2",
+    "reportlab",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

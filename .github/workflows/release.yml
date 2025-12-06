@@ -1,0 +1,130 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      new_release_published: ${{ steps.semantic.outputs.new_release_published }}
+      new_release_version: ${{ steps.semantic.outputs.new_release_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Semantic Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          extra_plugins: |
+            @semantic-release/git
+            @semantic-release/changelog
+
+  build-windows:
+    needs: release
+    if: needs.release.outputs.new_release_published == 'true'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.release.outputs.new_release_version }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -e .
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --onefile --name elli-billing-tool src/elli_billing_tool/cli.py
+
+      - name: Create distribution package
+        run: |
+          mkdir -p dist/package
+          mkdir -p dist/package/output
+          mkdir -p dist/package/template
+          copy dist/elli-billing-tool.exe dist/package/
+          copy .env.example dist/package/.env
+          copy template/mail.txt dist/package/template/
+          echo "Place your template PDF here: Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf" > dist/package/template/README.txt
+        shell: cmd
+
+      - name: Create ZIP
+        run: |
+          cd dist/package
+          Compress-Archive -Path * -DestinationPath ../windows_elli_billing_tool.zip
+        shell: powershell
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.release.outputs.new_release_version }}
+          files: dist/windows_elli_billing_tool.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    needs: release
+    if: needs.release.outputs.new_release_published == 'true'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.release.outputs.new_release_version }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -e .
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --onefile --name elli-billing-tool src/elli_billing_tool/cli.py
+
+      - name: Create distribution package
+        run: |
+          mkdir -p dist/package
+          mkdir -p dist/package/output
+          mkdir -p dist/package/template
+          cp dist/elli-billing-tool dist/package/
+          chmod +x dist/package/elli-billing-tool
+          cp .env.example dist/package/.env
+          cp template/mail.txt dist/package/template/
+          echo "Place your template PDF here: Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf" > dist/package/template/README.txt
+
+      - name: Create ZIP
+        run: |
+          cd dist/package
+          zip -r ../macOS_elli_billing_tool.zip *
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.release.outputs.new_release_version }}
+          files: dist/macOS_elli_billing_tool.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
