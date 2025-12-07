@@ -65,6 +65,7 @@ jobs:
           Copy-Item .env.example dist/package/.env
           Copy-Item template/mail.txt dist/package/template/
           "Place your template PDF here: Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf" | Out-File -FilePath dist/package/template/README.txt
+          "" | Out-File -FilePath dist/package/output/.gitkeep
         shell: powershell
 
       - name: Create ZIP
@@ -115,6 +116,7 @@ jobs:
           cp .env.example dist/package/.env
           cp template/mail.txt dist/package/template/
           echo "Place your template PDF here: Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf" > dist/package/template/README.txt
+          touch dist/package/output/.gitkeep
 
       - name: Create ZIP
         run: |
