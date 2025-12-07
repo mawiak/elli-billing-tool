@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/marcszy91/elli-billing-tool/compare/v1.0.5...v1.0.6) (2025-12-07)
+
+
+### Bug Fixes
+
+* only require all settings for generate not for list ([00a686e](https://github.com/marcszy91/elli-billing-tool/commit/00a686ecf0fef82c27de5ba89abdf348f5af9d58))
+
 ## [1.0.5](https://github.com/marcszy91/elli-billing-tool/compare/v1.0.4...v1.0.5) (2025-12-07)
 
 
