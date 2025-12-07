@@ -58,14 +58,14 @@ jobs:
 
       - name: Create distribution package
         run: |
-          mkdir -p dist/package
-          mkdir -p dist/package/output
-          mkdir -p dist/package/template
-          copy dist/elli-billing-tool.exe dist/package/
-          copy .env.example dist/package/.env
-          copy template/mail.txt dist/package/template/
-          echo "Place your template PDF here: Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf" > dist/package/template/README.txt
-        shell: cmd
+          New-Item -ItemType Directory -Force -Path dist/package
+          New-Item -ItemType Directory -Force -Path dist/package/output
+          New-Item -ItemType Directory -Force -Path dist/package/template
+          Copy-Item dist/elli-billing-tool.exe dist/package/
+          Copy-Item .env.example dist/package/.env
+          Copy-Item template/mail.txt dist/package/template/
+          "Place your template PDF here: Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf" | Out-File -FilePath dist/package/template/README.txt
+        shell: powershell
 
       - name: Create ZIP
         run: |
