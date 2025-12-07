@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/marcszy91/elli-billing-tool/compare/v1.0.1...v1.0.2) (2025-12-07)
+
+
+### Bug Fixes
+
+* ensure output folder is included in Windows ZIP ([3c632e5](https://github.com/marcszy91/elli-billing-tool/commit/3c632e58b18e2d36047e72b747ab4ed6fa199c93))
+
 ## [1.0.1](https://github.com/marcszy91/elli-billing-tool/compare/v1.0.0...v1.0.1) (2025-12-07)
 
 
