@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/marcszy91/elli-billing-tool/compare/v1.0.2...v1.0.3) (2025-12-07)
+
+
+### Bug Fixes
+
+* add PyInstaller spec file and __main__ entry point for proper bundling ([d0b31f7](https://github.com/marcszy91/elli-billing-tool/commit/d0b31f72097d73bf01e0af6619b42c2d0fa10e90))
+
 ## [1.0.2](https://github.com/marcszy91/elli-billing-tool/compare/v1.0.1...v1.0.2) (2025-12-07)
 
 
