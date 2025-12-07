@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/marcszy91/elli-billing-tool/compare/v1.0.3...v1.0.4) (2025-12-07)
+
+
+### Bug Fixes
+
+* use settings.json instead of .env file for configuration ([a2dcf59](https://github.com/marcszy91/elli-billing-tool/commit/a2dcf591212d4f7c00f98b2c0ddb4199ce155c16))
+
 ## [1.0.3](https://github.com/marcszy91/elli-billing-tool/compare/v1.0.2...v1.0.3) (2025-12-07)
 
 
