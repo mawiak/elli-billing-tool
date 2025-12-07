@@ -32,7 +32,7 @@ class Config:
     email_name: str
 
     @classmethod
-    def load_from_file(cls, settings_file: Path = None) -> "Config":
+    def load_from_file(cls, settings_file: Path = None, require_all: bool = True) -> "Config":
         """
         Load configuration from settings.json file.
 
@@ -80,46 +80,54 @@ class Config:
 
         # Check for missing required fields
         missing = []
+
+        # Always check credentials
         if not username or username == "your.email@example.com":
             missing.append("ELLI_EMAIL")
         if not password or password == "your_password":
             missing.append("ELLI_PASSWORD")
-        if not station_id:
-            missing.append("ELLI_STATION_ID (run 'list' command to find it)")
-        if not rfid_card_id:
-            missing.append("ELLI_RFID_CARD_ID (run 'list' command to find it)")
-        if not kwh_price_cents:
-            missing.append("ELLI_KWH_PRICE_CENTS")
-        if not location:
-            missing.append("ELLI_LOCATION")
-        if not email_subject:
-            missing.append("EMAIL_SUBJECT")
-        if not email_recipients:
-            missing.append("EMAIL_RECIPIENTS")
-        if not email_name or email_name == "Your Name":
-            missing.append("EMAIL_NAME")
+
+        # Only check other fields if require_all is True
+        if require_all:
+            if not station_id:
+                missing.append("ELLI_STATION_ID (run 'list' command to find it)")
+            if not rfid_card_id:
+                missing.append("ELLI_RFID_CARD_ID (run 'list' command to find it)")
+            if not kwh_price_cents:
+                missing.append("ELLI_KWH_PRICE_CENTS")
+            if not location:
+                missing.append("ELLI_LOCATION")
+            if not email_subject:
+                missing.append("EMAIL_SUBJECT")
+            if not email_recipients:
+                missing.append("EMAIL_RECIPIENTS")
+            if not email_name or email_name == "Your Name":
+                missing.append("EMAIL_NAME")
 
         if missing:
             raise ConfigError(
                 f"Missing or invalid configuration in settings.json:\n  - " + "\n  - ".join(missing)
             )
 
-        try:
-            kwh_price = float(kwh_price_cents)
-        except (ValueError, TypeError) as e:
-            raise ConfigError(
-                f"ELLI_KWH_PRICE_CENTS must be a valid number, got: {kwh_price_cents}"
-            ) from e
+        # Validate kwh_price only if require_all
+        kwh_price = 0.0
+        if require_all:
+            try:
+                kwh_price = float(kwh_price_cents)
+            except (ValueError, TypeError) as e:
+                raise ConfigError(
+                    f"ELLI_KWH_PRICE_CENTS must be a valid number, got: {kwh_price_cents}"
+                ) from e
 
         return cls(
             username=username,
             password=password,
-            station_id=station_id,
-            rfid_card_id=rfid_card_id,
+            station_id=station_id or "",
+            rfid_card_id=rfid_card_id or "",
             kwh_price_cents=kwh_price,
-            location=location,
-            email_subject=email_subject,
+            location=location or "",
+            email_subject=email_subject or "",
             email_recipients=email_recipients,
             email_cc=email_cc,
-            email_name=email_name
+            email_name=email_name or ""
         )

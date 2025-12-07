@@ -303,7 +303,10 @@ def main() -> None:
         sys.exit(1)
 
     try:
-        config = Config.load_from_file()
+        # For 'list' command, only require credentials
+        # For 'generate' command, require all fields
+        require_all = args.command != "list"
+        config = Config.load_from_file(require_all=require_all)
         cli = CLI(config)
 
         if args.command == "list":
