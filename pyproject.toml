@@ -10,7 +10,6 @@ readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
     "elli-client",
-    "python-dotenv",
     "PyPDF2",
     "reportlab",
 ]

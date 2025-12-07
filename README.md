@@ -28,18 +28,18 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -e .
 ```
 
-3. Place your reimbursement form template PDF in the `template` folder with the name:
-   `Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf`
-
-4. Configure your environment variables:
+3. Configure your settings:
 ```bash
-cp .env.example .env
-# Edit .env with your credentials
+cp settings.json.example settings.json
+# Edit settings.json with your credentials
 ```
+
+4. Place your reimbursement form template PDF in the `template` folder with the name:
+   `Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf`
 
 ## Configuration
 
-Copy `.env.example` to `.env` and fill in your details:
+Copy `settings.json.example` to `settings.json` and fill in your details:
 
 ### Required Configuration
 
@@ -47,8 +47,8 @@ Copy `.env.example` to `.env` and fill in your details:
 - `ELLI_PASSWORD`: Your Elli account password
 - `ELLI_STATION_ID`: Your charging station ID (use `list` command to find it)
 - `ELLI_RFID_CARD_ID`: Your RFID card ID (use `list` command to find it)
-- `ELLI_KWH_PRICE_CENTS`: Price per kWh in cents (e.g., 33.33 for 0.3333 EUR)
-- `ELLI_LOCATION`: Location for signature on form (e.g., Sankt Ingbert)
+- `ELLI_KWH_PRICE_CENTS`: Price per kWh in cents (e.g., "33.33" for 0.3333 EUR)
+- `ELLI_LOCATION`: Location for signature on form (e.g., "Sankt Ingbert")
 
 ### Email Configuration
 
@@ -56,6 +56,8 @@ Copy `.env.example` to `.env` and fill in your details:
 - `EMAIL_RECIPIENTS`: Comma-separated list of recipient email addresses
 - `EMAIL_CC`: Comma-separated list of CC email addresses (optional)
 - `EMAIL_NAME`: Your name for email signature
+
+The `settings.json` file uses JSON format with `_comment` fields for documentation. These comment fields are ignored by the tool.
 
 ## Usage
 
@@ -113,8 +115,8 @@ elli-billing-tool/
 │   ├── mail.txt               # Email template
 │   └── Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf  # Form template (add your own)
 ├── output/                     # Generated PDFs (gitignored)
-├── .env                        # Your configuration (gitignored)
-├── .env.example               # Example configuration
+├── settings.json               # Your configuration (gitignored)
+├── settings.json.example      # Example configuration
 ├── pyproject.toml             # Project metadata and dependencies
 └── README.md
 ```

@@ -62,7 +62,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path dist/package/output
           New-Item -ItemType Directory -Force -Path dist/package/template
           Copy-Item dist/elli-billing-tool.exe dist/package/
-          Copy-Item .env.example dist/package/.env
+          Copy-Item settings.json.example dist/package/settings.json
           Copy-Item template/mail.txt dist/package/template/
           "Place your template PDF here: Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf" | Out-File -FilePath dist/package/template/README.txt
           "" | Out-File -FilePath dist/package/output/.gitkeep
@@ -113,7 +113,7 @@ jobs:
           mkdir -p dist/package/template
           cp dist/elli-billing-tool dist/package/
           chmod +x dist/package/elli-billing-tool
-          cp .env.example dist/package/.env
+          cp settings.json.example dist/package/settings.json
           cp template/mail.txt dist/package/template/
           echo "Place your template PDF here: Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf" > dist/package/template/README.txt
           touch dist/package/output/.gitkeep

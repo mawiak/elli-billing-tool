@@ -9,7 +9,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Optional
 
-from .config import Config
+from .config import Config, ConfigError
 from .elli_service import ElliService
 from .pdf_parser import extract_total_kwh
 from .pdf_generator import generate_reimbursement_form
@@ -95,14 +95,19 @@ class CLI:
                 f"Template not found: {template}\n"
                 "Please place your template PDF at: template/Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf"
             )
-        # Determine month from date range
-        if start_date:
-            month_date = datetime.strptime(start_date, "%Y-%m-%d")
-        else:
-            # Default to last month
+
+        # Calculate default dates (last month) if not provided
+        if not start_date or not end_date:
             today = datetime.now()
-            first_of_current = today.replace(day=1)
-            month_date = first_of_current - timedelta(days=1)
+            first_of_current_month = today.replace(day=1)
+            last_day_of_last_month = first_of_current_month - timedelta(days=1)
+            first_of_last_month = last_day_of_last_month.replace(day=1)
+
+            start_date = start_date or first_of_last_month.strftime("%Y-%m-%d")
+            end_date = end_date or last_day_of_last_month.strftime("%Y-%m-%d")
+
+        # Determine month from date range
+        month_date = datetime.strptime(start_date, "%Y-%m-%d")
 
         # Create output directory structure: output/YYYY/MM/
         if not output_dir:
@@ -298,7 +303,7 @@ def main() -> None:
         sys.exit(1)
 
     try:
-        config = Config.load_from_env()
+        config = Config.load_from_file()
         cli = CLI(config)
 
         if args.command == "list":
@@ -310,7 +315,7 @@ def main() -> None:
                 end_date=args.end_date
             )
 
-    except ValueError as e:
+    except ConfigError as e:
         print(f"Configuration error: {e}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:

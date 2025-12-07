@@ -2,17 +2,20 @@
 Configuration management for the Elli Billing Tool.
 """
 
-import os
+import json
 from dataclasses import dataclass
-from typing import Optional
+from pathlib import Path
 
-from dotenv import load_dotenv
+
+class ConfigError(Exception):
+    """Custom exception for configuration errors."""
+    pass
 
 
 @dataclass
 class Config:
     """
-    Application configuration loaded from environment variables.
+    Application configuration loaded from settings.json.
     """
 
     username: str
@@ -29,66 +32,82 @@ class Config:
     email_name: str
 
     @classmethod
-    def load_from_env(cls, env_file: Optional[str] = None) -> "Config":
+    def load_from_file(cls, settings_file: Path = None) -> "Config":
         """
-        Load configuration from .env file or environment variables.
+        Load configuration from settings.json file.
 
         Args:
-            env_file: Optional path to .env file. Defaults to .env in current directory.
+            settings_file: Optional path to settings.json file. Defaults to settings.json in current directory.
 
         Returns:
             Config instance with loaded values.
 
         Raises:
-            ValueError: If required environment variables are missing.
+            ConfigError: If settings file is missing or has invalid values.
         """
-        if env_file:
-            load_dotenv(env_file)
-        else:
-            load_dotenv()
+        if settings_file is None:
+            settings_file = Path("settings.json")
 
-        username = os.getenv("ELLI_EMAIL")
-        password = os.getenv("ELLI_PASSWORD")
-        station_id = os.getenv("ELLI_STATION_ID")
-        rfid_card_id = os.getenv("ELLI_RFID_CARD_ID")
-        kwh_price_cents = os.getenv("ELLI_KWH_PRICE_CENTS")
-        location = os.getenv("ELLI_LOCATION")
+        if not settings_file.exists():
+            raise ConfigError(
+                f"Settings file not found: {settings_file}\n"
+                "Please copy settings.json.example to settings.json and fill in your details."
+            )
+
+        try:
+            with open(settings_file, "r", encoding="utf-8") as f:
+                settings = json.load(f)
+        except json.JSONDecodeError as e:
+            raise ConfigError(f"Invalid JSON in settings file: {e}")
+
+        # Filter out comment fields
+        settings = {k: v for k, v in settings.items() if not k.startswith("_")}
+
+        username = settings.get("ELLI_EMAIL")
+        password = settings.get("ELLI_PASSWORD")
+        station_id = settings.get("ELLI_STATION_ID")
+        rfid_card_id = settings.get("ELLI_RFID_CARD_ID")
+        kwh_price_cents = settings.get("ELLI_KWH_PRICE_CENTS")
+        location = settings.get("ELLI_LOCATION")
 
         # Email configuration
-        email_subject = os.getenv("EMAIL_SUBJECT")
-        email_recipients = os.getenv("EMAIL_RECIPIENTS", "").split(",")
-        email_cc = os.getenv("EMAIL_CC", "").split(",") if os.getenv("EMAIL_CC") else []
-        email_name = os.getenv("EMAIL_NAME")
+        email_subject = settings.get("EMAIL_SUBJECT")
+        email_recipients_str = settings.get("EMAIL_RECIPIENTS", "")
+        email_recipients = [r.strip() for r in email_recipients_str.split(",") if r.strip()]
+        email_cc_str = settings.get("EMAIL_CC", "")
+        email_cc = [c.strip() for c in email_cc_str.split(",") if c.strip()]
+        email_name = settings.get("EMAIL_NAME")
 
-        if not all([username, password, station_id, rfid_card_id, kwh_price_cents, location, email_subject, email_recipients, email_name]):
-            missing = []
-            if not username:
-                missing.append("ELLI_EMAIL")
-            if not password:
-                missing.append("ELLI_PASSWORD")
-            if not station_id:
-                missing.append("ELLI_STATION_ID")
-            if not rfid_card_id:
-                missing.append("ELLI_RFID_CARD_ID")
-            if not kwh_price_cents:
-                missing.append("ELLI_KWH_PRICE_CENTS")
-            if not location:
-                missing.append("ELLI_LOCATION")
-            if not email_subject:
-                missing.append("EMAIL_SUBJECT")
-            if not email_recipients or not email_recipients[0]:
-                missing.append("EMAIL_RECIPIENTS")
-            if not email_name:
-                missing.append("EMAIL_NAME")
+        # Check for missing required fields
+        missing = []
+        if not username or username == "your.email@example.com":
+            missing.append("ELLI_EMAIL")
+        if not password or password == "your_password":
+            missing.append("ELLI_PASSWORD")
+        if not station_id:
+            missing.append("ELLI_STATION_ID (run 'list' command to find it)")
+        if not rfid_card_id:
+            missing.append("ELLI_RFID_CARD_ID (run 'list' command to find it)")
+        if not kwh_price_cents:
+            missing.append("ELLI_KWH_PRICE_CENTS")
+        if not location:
+            missing.append("ELLI_LOCATION")
+        if not email_subject:
+            missing.append("EMAIL_SUBJECT")
+        if not email_recipients:
+            missing.append("EMAIL_RECIPIENTS")
+        if not email_name or email_name == "Your Name":
+            missing.append("EMAIL_NAME")
 
-            raise ValueError(
-                f"Missing required environment variables: {', '.join(missing)}"
+        if missing:
+            raise ConfigError(
+                f"Missing or invalid configuration in settings.json:\n  - " + "\n  - ".join(missing)
             )
 
         try:
             kwh_price = float(kwh_price_cents)
-        except ValueError as e:
-            raise ValueError(
+        except (ValueError, TypeError) as e:
+            raise ConfigError(
                 f"ELLI_KWH_PRICE_CENTS must be a valid number, got: {kwh_price_cents}"
             ) from e
 

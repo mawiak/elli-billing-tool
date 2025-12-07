@@ -1,0 +1,21 @@
+{
+  "_comment_credentials": "Your Elli account credentials",
+  "ELLI_EMAIL": "your.email@example.com",
+  "ELLI_PASSWORD": "your_password",
+
+  "_comment_ids": "Run the 'list' command to find these IDs",
+  "ELLI_STATION_ID": "",
+  "ELLI_RFID_CARD_ID": "",
+
+  "_comment_pricing": "Price per kWh in cents (e.g., 33.33 for 0.3333 EUR)",
+  "ELLI_KWH_PRICE_CENTS": "30",
+
+  "_comment_location": "Location for signature on form (e.g., Sankt Ingbert)",
+  "ELLI_LOCATION": "Sankt Ingbert",
+
+  "_comment_email": "Email configuration - subject can use placeholders: {MONTH}, {YEAR}, {NAME}",
+  "EMAIL_SUBJECT": "Energiekostenabrechnung {MONTH} {YEAR}",
+  "EMAIL_RECIPIENTS": "fibu@example.com,accounting@example.com",
+  "EMAIL_CC": "manager@example.com",
+  "EMAIL_NAME": "Your Name"
+}
