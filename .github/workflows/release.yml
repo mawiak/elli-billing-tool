@@ -54,7 +54,7 @@ jobs:
 
       - name: Build with PyInstaller
         run: |
-          pyinstaller --onefile --name elli-billing-tool src/elli_billing_tool/cli.py
+          pyinstaller elli-billing-tool.spec
 
       - name: Create distribution package
         run: |
@@ -104,7 +104,7 @@ jobs:
 
       - name: Build with PyInstaller
         run: |
-          pyinstaller --onefile --name elli-billing-tool src/elli_billing_tool/cli.py
+          pyinstaller elli-billing-tool.spec
 
       - name: Create distribution package
         run: |
