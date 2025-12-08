@@ -50,21 +50,20 @@ class CLI:
                     if hasattr(station, 'serial_number') and station.serial_number:
                         print(f"  Serial: {station.serial_number}")
 
-            print("\n=== RFID Cards (from Charging Sessions) ===")
-            sessions = service.get_charging_sessions()
-
-            rfid_cards = {}
-            for session in sessions:
-                if session.rfid_card_id and session.rfid_card_id not in rfid_cards:
-                    rfid_cards[session.rfid_card_id] = session.rfid_card_serial_number
+            print("\n=== RFID Cards ===")
+            rfid_cards = service.get_rfid_cards()
 
             if not rfid_cards:
-                print("No RFID cards found in charging sessions.")
+                print("No RFID cards found.")
             else:
-                for card_id, serial in rfid_cards.items():
-                    print(f"\nRFID Card ID: {card_id}")
-                    if serial:
-                        print(f"  Serial: {serial}")
+                for card in rfid_cards:
+                    print(f"\nRFID Card ID: {card.id}")
+                    if hasattr(card, 'number') and card.number:
+                        print(f"  Number: {card.number}")
+                    if hasattr(card, 'status') and card.status:
+                        print(f"  Status: {card.status}")
+                    if hasattr(card, 'brand_id') and card.brand_id:
+                        print(f"  Brand ID: {card.brand_id}")
 
         print("\nUse these IDs in your .env file:")
         print("  ELLI_STATION_ID=<station-id>")

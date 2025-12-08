@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from typing import List
 
 from elli_client import ElliAPIClient
-from elli_client.models import Station, ChargingSession
+from elli_client.models import Station, ChargingSession, RFIDCard
 
 
 class ElliService:
@@ -64,6 +64,18 @@ class ElliService:
             raise RuntimeError("Service not initialized. Use as context manager.")
 
         return self.client.get_charging_sessions()
+
+    def get_rfid_cards(self) -> List[RFIDCard]:
+        """
+        Retrieve all RFID cards.
+
+        Returns:
+            List of RFIDCard objects.
+        """
+        if not self.client:
+            raise RuntimeError("Service not initialized. Use as context manager.")
+
+        return self.client.get_rfid_cards()
 
     def get_charging_records_pdf(
         self,
