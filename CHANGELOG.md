@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/marcszy91/elli-billing-tool/compare/v1.0.7...v1.0.8) (2025-12-08)
+
+
+### Bug Fixes
+
+* wrapper script for windows ([5400d87](https://github.com/marcszy91/elli-billing-tool/commit/5400d87e7935f22c75df1611b46e889fa9225e4c))
+
 ## [1.0.7](https://github.com/marcszy91/elli-billing-tool/compare/v1.0.6...v1.0.7) (2025-12-08)
 
 
