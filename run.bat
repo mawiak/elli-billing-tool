@@ -46,12 +46,12 @@ if %ERRORLEVEL% EQU 0 (
 )
 
 REM Check if Station ID or RFID Card ID are empty
-findstr /C:"""ELLI_STATION_ID"": """"" "%SETTINGS%" >nul
+findstr /R "\"ELLI_STATION_ID\".*:.*\"\"" "%SETTINGS%" >nul
 if %ERRORLEVEL% EQU 0 (
     goto :run_list
 )
 
-findstr /C:"""ELLI_RFID_CARD_ID"": """"" "%SETTINGS%" >nul
+findstr /R "\"ELLI_RFID_CARD_ID\".*:.*\"\"" "%SETTINGS%" >nul
 if %ERRORLEVEL% EQU 0 (
     goto :run_list
 )
