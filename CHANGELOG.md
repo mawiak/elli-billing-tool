@@ -1,3 +1,10 @@
+## [1.0.7](https://github.com/marcszy91/elli-billing-tool/compare/v1.0.6...v1.0.7) (2025-12-08)
+
+
+### Bug Fixes
+
+* use new api to get rfid card information ([6686e9b](https://github.com/marcszy91/elli-billing-tool/commit/6686e9be69ebc46a50d0f5b041262f8fcad04f9a))
+
 ## [1.0.6](https://github.com/marcszy91/elli-billing-tool/compare/v1.0.5...v1.0.6) (2025-12-07)
 
 
