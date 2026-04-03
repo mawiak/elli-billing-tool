@@ -1,3 +1,10 @@
+## [1.0.9](https://github.com/mawiak/elli-billing-tool/compare/v1.0.8...v1.0.9) (2026-04-03)
+
+
+### Bug Fixes
+
+* improve timezone handling for charging record date conversion ([73fc1ca](https://github.com/mawiak/elli-billing-tool/commit/73fc1caa63ff6686ab19615869e4a0f23172f90f))
+
 ## [1.0.8](https://github.com/marcszy91/elli-billing-tool/compare/v1.0.7...v1.0.8) (2025-12-08)
 
 
