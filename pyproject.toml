@@ -7,11 +7,12 @@ name = "elli-billing-tool"
 version = "0.1.0"
 description = "Automated charging report generation for company car reimbursement"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "elli-client>=1.2.0",
     "PyPDF2",
     "reportlab",
+    "tzdata; platform_system=='Windows'",
 ]
 
 [tool.setuptools.packages.find]

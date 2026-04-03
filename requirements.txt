@@ -1,4 +1,5 @@
-elli-client
+elli-client>=1.2.0
 python-dotenv
 PyPDF2
 reportlab
+tzdata; platform_system=='Windows'
