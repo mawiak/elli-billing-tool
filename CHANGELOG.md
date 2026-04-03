@@ -1,3 +1,10 @@
+## [1.0.10](https://github.com/mawiak/elli-billing-tool/compare/v1.0.9...v1.0.10) (2026-04-03)
+
+
+### Bug Fixes
+
+* update Python version requirement and specify elli-client version in dependencies ([3950b62](https://github.com/mawiak/elli-billing-tool/commit/3950b62505065957c4631d31835d0c09754d65e5))
+
 ## [1.0.9](https://github.com/mawiak/elli-billing-tool/compare/v1.0.8...v1.0.9) (2026-04-03)
 
 
