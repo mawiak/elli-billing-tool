@@ -2,8 +2,9 @@
 Service layer for interacting with the Elli API.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, time
 from typing import List
+from zoneinfo import ZoneInfo
 
 from elli_client import ElliAPIClient
 from elli_client.models import Station, ChargingSession, RFIDCard
@@ -101,14 +102,20 @@ class ElliService:
         if not self.client:
             raise RuntimeError("Service not initialized. Use as context manager.")
 
-        # Convert dates to UTC timestamps
-        # Start: YYYY-MM-DD 00:00:00 Berlin time -> subtract 1 hour for UTC (23:00 previous day)
-        start_dt = datetime.strptime(start_date, "%Y-%m-%d")
-        created_at_after = (start_dt - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        # Convert dates to UTC timestamps with proper timezone handling
+        # This correctly handles DST (Daylight Saving Time) transitions
+        tz = ZoneInfo(timezone)
+        utc_tz = ZoneInfo("UTC")
 
-        # End: YYYY-MM-DD 23:59:59 Berlin time -> subtract 1 hour + 1 minute for UTC
+        # Start: YYYY-MM-DD 00:00:00 in specified timezone -> convert to UTC
+        start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+        start_local = datetime.combine(start_dt, time.min, tzinfo=tz)
+        created_at_after = start_local.astimezone(utc_tz).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        # End: YYYY-MM-DD 23:59:59 in specified timezone -> convert to UTC
         end_dt = datetime.strptime(end_date, "%Y-%m-%d")
-        created_at_before = (end_dt + timedelta(hours=22, minutes=59)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        end_local = datetime.combine(end_dt, time(23, 59, 59), tzinfo=tz)
+        created_at_before = end_local.astimezone(utc_tz).strftime("%Y-%m-%dT%H:%M:%SZ")
 
         return self.client.get_charging_records_pdf(
             station_id=station_id,
