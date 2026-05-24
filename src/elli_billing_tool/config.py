@@ -21,9 +21,10 @@ class Config:
     username: str
     password: str
     station_id: str
-    rfid_card_id: str
+    rfid_card_id: str | None  # Optional: None = all sessions (RFID + App)
     kwh_price_cents: float
     location: str
+    current_month: bool  # True = current month, False = last completed month
 
     # Email configuration
     email_subject: str
@@ -66,9 +67,10 @@ class Config:
         username = settings.get("ELLI_EMAIL")
         password = settings.get("ELLI_PASSWORD")
         station_id = settings.get("ELLI_STATION_ID")
-        rfid_card_id = settings.get("ELLI_RFID_CARD_ID")
+        rfid_card_id = settings.get("ELLI_RFID_CARD_ID") or None  # Empty string -> None
         kwh_price_cents = settings.get("ELLI_KWH_PRICE_CENTS")
         location = settings.get("ELLI_LOCATION")
+        current_month = settings.get("ELLI_CURRENT_MONTH", False)
 
         # Email configuration
         email_subject = settings.get("EMAIL_SUBJECT")
@@ -91,8 +93,7 @@ class Config:
         if require_all:
             if not station_id:
                 missing.append("ELLI_STATION_ID (run 'list' command to find it)")
-            if not rfid_card_id:
-                missing.append("ELLI_RFID_CARD_ID (run 'list' command to find it)")
+            # RFID_CARD_ID is now optional - if empty/None, all sessions (RFID + App) will be included
             if not kwh_price_cents:
                 missing.append("ELLI_KWH_PRICE_CENTS")
             if not location:
@@ -123,9 +124,10 @@ class Config:
             username=username,
             password=password,
             station_id=station_id or "",
-            rfid_card_id=rfid_card_id or "",
+            rfid_card_id=rfid_card_id,  # Can be None
             kwh_price_cents=kwh_price,
             location=location or "",
+            current_month=current_month,
             email_subject=email_subject or "",
             email_recipients=email_recipients,
             email_cc=email_cc,

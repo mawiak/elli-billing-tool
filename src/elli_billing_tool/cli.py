@@ -95,15 +95,22 @@ class CLI:
                 "Please place your template PDF at: template/Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf"
             )
 
-        # Calculate default dates (last month) if not provided
+        # Calculate default dates if not provided
         if not start_date or not end_date:
             today = datetime.now()
-            first_of_current_month = today.replace(day=1)
-            last_day_of_last_month = first_of_current_month - timedelta(days=1)
-            first_of_last_month = last_day_of_last_month.replace(day=1)
 
-            start_date = start_date or first_of_last_month.strftime("%Y-%m-%d")
-            end_date = end_date or last_day_of_last_month.strftime("%Y-%m-%d")
+            if self.config.current_month:
+                # Current month: from 1st of current month to today
+                first_of_current_month = today.replace(day=1)
+                start_date = start_date or first_of_current_month.strftime("%Y-%m-%d")
+                end_date = end_date or today.strftime("%Y-%m-%d")
+            else:
+                # Last completed month (default)
+                first_of_current_month = today.replace(day=1)
+                last_day_of_last_month = first_of_current_month - timedelta(days=1)
+                first_of_last_month = last_day_of_last_month.replace(day=1)
+                start_date = start_date or first_of_last_month.strftime("%Y-%m-%d")
+                end_date = end_date or last_day_of_last_month.strftime("%Y-%m-%d")
 
         # Determine month from date range
         month_date = datetime.strptime(start_date, "%Y-%m-%d")
@@ -122,7 +129,10 @@ class CLI:
 
         print(f"Downloading charging records from {start_date} to {end_date}...")
         print(f"Station ID: {self.config.station_id}")
-        print(f"RFID Card ID: {self.config.rfid_card_id}")
+        if self.config.rfid_card_id:
+            print(f"RFID Card ID: {self.config.rfid_card_id}")
+        else:
+            print("RFID Card ID: (all sessions - RFID + App)")
 
         with ElliService(self.config.username, self.config.password) as service:
             pdf_content = service.get_charging_records_pdf(

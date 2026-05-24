@@ -81,7 +81,7 @@ class ElliService:
     def get_charging_records_pdf(
         self,
         station_id: str,
-        rfid_card_id: str,
+        rfid_card_id: str | None,
         start_date: str,
         end_date: str,
         timezone: str = "Europe/Berlin"
@@ -91,7 +91,7 @@ class ElliService:
 
         Args:
             station_id: ID of the charging station.
-            rfid_card_id: ID of the RFID card.
+            rfid_card_id: ID of the RFID card (None = all sessions including App).
             start_date: Start date in ISO format (YYYY-MM-DD).
             end_date: End date in ISO format (YYYY-MM-DD).
             timezone: Timezone for the PDF (default: Europe/Berlin).

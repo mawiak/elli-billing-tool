@@ -3,7 +3,7 @@
   "ELLI_EMAIL": "your.email@example.com",
   "ELLI_PASSWORD": "your_password",
 
-  "_comment_ids": "Run the 'list' command to find these IDs",
+  "_comment_ids": "Run the 'list' command to find these IDs. Leave ELLI_RFID_CARD_ID empty to include ALL charging sessions (RFID + App)",
   "ELLI_STATION_ID": "",
   "ELLI_RFID_CARD_ID": "",
 
@@ -12,6 +12,9 @@
 
   "_comment_location": "Location for signature on form (e.g., Sankt Ingbert)",
   "ELLI_LOCATION": "Sankt Ingbert",
+
+  "_comment_current_month": "Set to true to generate report for current month instead of last completed month (default: false)",
+  "ELLI_CURRENT_MONTH": false,
 
   "_comment_email": "Email configuration - subject can use placeholders: {MONTH}, {YEAR}, {NAME}",
   "EMAIL_SUBJECT": "Energiekostenabrechnung {MONTH} {YEAR}",
