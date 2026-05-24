@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/mawiak/elli-billing-tool/compare/v1.0.10...v1.1.0) (2026-05-24)
+
+
+### Features
+
+* enhance configuration and CLI for current month reporting; report all sessions (include app); update dependencies ([759b4d8](https://github.com/mawiak/elli-billing-tool/commit/759b4d84db3f616be46defde5749982b242240a0))
+
 ## [1.0.10](https://github.com/mawiak/elli-billing-tool/compare/v1.0.9...v1.0.10) (2026-04-03)
 
 
