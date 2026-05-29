@@ -44,17 +44,17 @@ if [ "$EMAIL" = "your.email@example.com" ] || [ -z "$EMAIL" ] || [ "$PASSWORD" =
     exit 1
 fi
 
-# Check if Station ID or RFID Card ID are missing or default
-if [ -z "$STATION_ID" ] || [ -z "$RFID_CARD_ID" ]; then
-    echo "⚠️  Station ID or RFID Card ID not configured."
+# Check if Station ID is missing (RFID Card ID is optional)
+if [ -z "$STATION_ID" ]; then
+    echo "⚠️  Station ID not configured."
     echo ""
     echo "Running 'list' command to show your available IDs..."
     echo ""
     "$BINARY" list
     echo ""
-    echo "Please copy the IDs above into your $SETTINGS file:"
-    echo "  - ELLI_STATION_ID"
-    echo "  - ELLI_RFID_CARD_ID"
+    echo "Please copy the Station ID into your $SETTINGS file:"
+    echo "  - ELLI_STATION_ID (required)"
+    echo "  - ELLI_RFID_CARD_ID (optional - leave empty to include all sessions)"
     echo ""
     read -p "Press Enter to exit..."
     exit 0

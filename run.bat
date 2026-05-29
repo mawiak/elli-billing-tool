@@ -45,13 +45,8 @@ if %ERRORLEVEL% EQU 0 (
     exit /b 1
 )
 
-REM Check if Station ID or RFID Card ID are empty
+REM Check if Station ID is empty (RFID Card ID is optional)
 findstr /R "\"ELLI_STATION_ID\".*:.*\"\"" "%SETTINGS%" >nul
-if %ERRORLEVEL% EQU 0 (
-    goto :run_list
-)
-
-findstr /R "\"ELLI_RFID_CARD_ID\".*:.*\"\"" "%SETTINGS%" >nul
 if %ERRORLEVEL% EQU 0 (
     goto :run_list
 )
@@ -65,15 +60,15 @@ pause
 exit /b 0
 
 :run_list
-echo Station ID or RFID Card ID not configured.
+echo Station ID not configured.
 echo.
 echo Running 'list' command to show your available IDs...
 echo.
 "%BINARY%" list
 echo.
-echo Please copy the IDs above into your %SETTINGS% file:
-echo   - ELLI_STATION_ID
-echo   - ELLI_RFID_CARD_ID
+echo Please copy the Station ID into your %SETTINGS% file:
+echo   - ELLI_STATION_ID ^(required^)
+echo   - ELLI_RFID_CARD_ID ^(optional - leave empty to include all sessions^)
 echo.
 pause
 exit /b 0
