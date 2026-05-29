@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/mawiak/elli-billing-tool/compare/v1.1.0...v1.1.1) (2026-05-29)
+
+
+### Bug Fixes
+
+* update validation for Station ID and clarify RFID Card ID as optional ([e87507e](https://github.com/mawiak/elli-billing-tool/commit/e87507e4056fae7e4c2367575daf4c76808b70ab))
+
 # [1.1.0](https://github.com/mawiak/elli-billing-tool/compare/v1.0.10...v1.1.0) (2026-05-24)
 
 
