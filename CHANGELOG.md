@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/mawiak/elli-billing-tool/compare/v1.1.1...v1.2.0) (2026-08-05)
+
+
+### Features
+
+* Update authentication mechanism and remove deprecated credential fields ([fb20584](https://github.com/mawiak/elli-billing-tool/commit/fb205843a76b176d88bfce2e9fe75dffc37283a5))
+
 ## [1.1.1](https://github.com/mawiak/elli-billing-tool/compare/v1.1.0...v1.1.1) (2026-05-29)
 
 
