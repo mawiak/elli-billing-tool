@@ -11,6 +11,10 @@ from typing import Optional
 
 from .config import Config, ConfigError
 from .elli_service import ElliService
+from .auth import AuthenticationService, TokenStore
+from .auth.callback_ipc import CallbackError, forward_callback
+from .auth.token_store import TokenStoreError
+from elli_client import ElliAPIClient, InvalidOAuthCallback, TokenRefreshError
 from .pdf_parser import extract_total_kwh
 from .pdf_generator import generate_reimbursement_form
 from .mail_generator import load_mail_template
@@ -36,34 +40,38 @@ class CLI:
         """
         print("Connecting to Elli API...")
 
-        with ElliService(self.config.username, self.config.password) as service:
-            print("\n=== Charging Stations ===")
-            stations = service.get_stations()
+        client = AuthenticationService().get_authenticated_client()
+        try:
+            with ElliService(client) as service:
+                print("\n=== Charging Stations ===")
+                stations = service.get_stations()
 
-            if not stations:
-                print("No stations found.")
-            else:
-                for station in stations:
-                    print(f"\nStation ID: {station.id}")
-                    if hasattr(station, 'name') and station.name:
-                        print(f"  Name: {station.name}")
-                    if hasattr(station, 'serial_number') and station.serial_number:
-                        print(f"  Serial: {station.serial_number}")
+                if not stations:
+                    print("No stations found.")
+                else:
+                    for station in stations:
+                        print(f"\nStation ID: {station.id}")
+                        if hasattr(station, 'name') and station.name:
+                            print(f"  Name: {station.name}")
+                        if hasattr(station, 'serial_number') and station.serial_number:
+                            print(f"  Serial: {station.serial_number}")
 
-            print("\n=== RFID Cards ===")
-            rfid_cards = service.get_rfid_cards()
+                print("\n=== RFID Cards ===")
+                rfid_cards = service.get_rfid_cards()
 
-            if not rfid_cards:
-                print("No RFID cards found.")
-            else:
-                for card in rfid_cards:
-                    print(f"\nRFID Card ID: {card.id}")
-                    if hasattr(card, 'number') and card.number:
-                        print(f"  Number: {card.number}")
-                    if hasattr(card, 'status') and card.status:
-                        print(f"  Status: {card.status}")
-                    if hasattr(card, 'brand_id') and card.brand_id:
-                        print(f"  Brand ID: {card.brand_id}")
+                if not rfid_cards:
+                    print("No RFID cards found.")
+                else:
+                    for card in rfid_cards:
+                        print(f"\nRFID Card ID: {card.id}")
+                        if hasattr(card, 'number') and card.number:
+                            print(f"  Number: {card.number}")
+                        if hasattr(card, 'status') and card.status:
+                            print(f"  Status: {card.status}")
+                        if hasattr(card, 'brand_id') and card.brand_id:
+                            print(f"  Brand ID: {card.brand_id}")
+        finally:
+            client.close()
 
         print("\nUse these IDs in your .env file:")
         print("  ELLI_STATION_ID=<station-id>")
@@ -134,16 +142,20 @@ class CLI:
         else:
             print("RFID Card ID: (all sessions - RFID + App)")
 
-        with ElliService(self.config.username, self.config.password) as service:
-            pdf_content = service.get_charging_records_pdf(
-                station_id=self.config.station_id,
-                rfid_card_id=self.config.rfid_card_id,
-                start_date=start_date,
-                end_date=end_date
-            )
+        client = AuthenticationService().get_authenticated_client()
+        try:
+            with ElliService(client) as service:
+                pdf_content = service.get_charging_records_pdf(
+                    station_id=self.config.station_id,
+                    rfid_card_id=self.config.rfid_card_id,
+                    start_date=start_date,
+                    end_date=end_date
+                )
 
-            with open(charging_pdf, 'wb') as f:
-                f.write(pdf_content)
+                with open(charging_pdf, 'wb') as f:
+                    f.write(pdf_content)
+        finally:
+            client.close()
 
         print(f"PDF saved to: {charging_pdf}")
 
@@ -290,6 +302,11 @@ def main() -> None:
         "list",
         help="List all available stations and RFID cards"
     )
+    subparsers.add_parser("login", help="Open the browser and connect an Elli account")
+    subparsers.add_parser("logout", help="Delete the locally stored refresh token")
+    subparsers.add_parser("status", help="Show whether an Elli account is connected locally")
+    callback_parser = subparsers.add_parser("oauth-callback", help=argparse.SUPPRESS)
+    callback_parser.add_argument("callback_url", help=argparse.SUPPRESS)
 
     # Generate command
     generate_parser = subparsers.add_parser(
@@ -308,14 +325,28 @@ def main() -> None:
     args = parser.parse_args()
 
     if not args.command:
-        parser.print_help()
-        sys.exit(1)
+        args.command = "generate"
+        args.start_date = None
+        args.end_date = None
 
     try:
-        # For 'list' command, only require credentials
-        # For 'generate' command, require all fields
-        require_all = args.command != "list"
-        config = Config.load_from_file(require_all=require_all)
+        if args.command == "oauth-callback":
+            forward_callback(args.callback_url)
+            return
+        auth = AuthenticationService()
+        if args.command == "logout":
+            auth.logout()
+            print("Lokale Elli-Anmeldung gelöscht.")
+            return
+        if args.command == "status":
+            print(f"Elli-Konto lokal verbunden: {'ja' if TokenStore().has_credentials() else 'nein'}")
+            return
+        if args.command == "login":
+            client = auth.interactive_login()
+            client.close()
+            return
+
+        config = Config.load_from_file(require_all=args.command != "list")
         cli = CLI(config)
 
         if args.command == "list":
@@ -329,6 +360,12 @@ def main() -> None:
 
     except ConfigError as e:
         print(f"Configuration error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except TokenRefreshError as e:
+        print(f"Token-Erneuerung fehlgeschlagen; der gespeicherte Token bleibt erhalten. Bitte versuche es später erneut: {e}", file=sys.stderr)
+        sys.exit(1)
+    except (CallbackError, TokenStoreError, InvalidOAuthCallback) as e:
+        print(f"Anmeldung fehlgeschlagen: {e}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)

@@ -1,8 +1,4 @@
 {
-  "_comment_credentials": "Your Elli account credentials",
-  "ELLI_EMAIL": "your.email@example.com",
-  "ELLI_PASSWORD": "your_password",
-
   "_comment_ids": "Run the 'list' command to find these IDs. Leave ELLI_RFID_CARD_ID empty to include ALL charging sessions (RFID + App)",
   "ELLI_STATION_ID": "",
   "ELLI_RFID_CARD_ID": "",

@@ -5,7 +5,7 @@
 
 cd "$(dirname "$0")"
 
-BINARY="./elli-billing-tool"
+BINARY="./elli-billing-tool.exec"
 SETTINGS="settings.json"
 
 echo "=========================================="
@@ -26,22 +26,20 @@ if [ ! -f "$SETTINGS" ]; then
     exit 1
 fi
 
-# Read settings and check for default values
-EMAIL=$(grep -o '"ELLI_EMAIL"[[:space:]]*:[[:space:]]*"[^"]*"' "$SETTINGS" | cut -d'"' -f4)
-PASSWORD=$(grep -o '"ELLI_PASSWORD"[[:space:]]*:[[:space:]]*"[^"]*"' "$SETTINGS" | cut -d'"' -f4)
+case "${1:-}" in
+    login|logout|status|oauth-callback)
+        "$BINARY" "$@"
+        exit $?
+        ;;
+esac
+
+# Read settings and check for required business values
 STATION_ID=$(grep -o '"ELLI_STATION_ID"[[:space:]]*:[[:space:]]*"[^"]*"' "$SETTINGS" | cut -d'"' -f4)
 RFID_CARD_ID=$(grep -o '"ELLI_RFID_CARD_ID"[[:space:]]*:[[:space:]]*"[^"]*"' "$SETTINGS" | cut -d'"' -f4)
 
-# Check credentials first
-if [ "$EMAIL" = "your.email@example.com" ] || [ -z "$EMAIL" ] || [ "$PASSWORD" = "your_password" ] || [ -z "$PASSWORD" ]; then
-    echo "⚠️  Please configure your Elli account credentials first!"
-    echo ""
-    echo "Edit $SETTINGS and set:"
-    echo "  - ELLI_EMAIL (your Elli account email)"
-    echo "  - ELLI_PASSWORD (your Elli account password)"
-    echo ""
-    read -p "Press Enter to exit..."
-    exit 1
+if [[ "$OSTYPE" == "darwin"* ]] && [ -d "Elli Login Callback.app" ]; then
+    LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+    "$LSREGISTER" -f "$(pwd)/Elli Login Callback.app" || exit 1
 fi
 
 # Check if Station ID is missing (RFID Card ID is optional)
@@ -63,7 +61,11 @@ fi
 # All settings look good, run generate
 echo "✓ Configuration looks good, generating report..."
 echo ""
-"$BINARY" generate "$@"
+if [ "$#" -eq 0 ]; then
+    "$BINARY" generate
+else
+    "$BINARY" "$@"
+fi
 
 echo ""
 read -p "Press Enter to exit..."

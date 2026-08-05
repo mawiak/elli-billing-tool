@@ -3,6 +3,7 @@ Configuration management for the Elli Billing Tool.
 """
 
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -18,8 +19,6 @@ class Config:
     Application configuration loaded from settings.json.
     """
 
-    username: str
-    password: str
     station_id: str
     rfid_card_id: str | None  # Optional: None = all sessions (RFID + App)
     kwh_price_cents: float
@@ -61,11 +60,23 @@ class Config:
         except json.JSONDecodeError as e:
             raise ConfigError(f"Invalid JSON in settings file: {e}")
 
-        # Filter out comment fields
+        # Remove obsolete password-login fields when the file can safely be replaced.
+        obsolete = {"ELLI_EMAIL", "ELLI_PASSWORD"}.intersection(settings)
+        if obsolete:
+            migrated = {k: v for k, v in settings.items() if k not in obsolete}
+            try:
+                temporary = settings_file.with_name(f".{settings_file.name}.{os.getpid()}.tmp")
+                temporary.write_text(json.dumps(migrated, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+                os.replace(temporary, settings_file)
+                settings = migrated
+                print("Hinweis: Veraltete Elli-E-Mail-/Passwortfelder wurden aus settings.json entfernt.")
+            except OSError:
+                temporary.unlink(missing_ok=True)
+                print("Hinweis: Veraltete Elli-E-Mail-/Passwortfelder werden ignoriert.")
+
+        # Filter out documentation-only fields after migration so they are preserved on disk.
         settings = {k: v for k, v in settings.items() if not k.startswith("_")}
 
-        username = settings.get("ELLI_EMAIL")
-        password = settings.get("ELLI_PASSWORD")
         station_id = settings.get("ELLI_STATION_ID")
         rfid_card_id = settings.get("ELLI_RFID_CARD_ID") or None  # Empty string -> None
         kwh_price_cents = settings.get("ELLI_KWH_PRICE_CENTS")
@@ -82,12 +93,6 @@ class Config:
 
         # Check for missing required fields
         missing = []
-
-        # Always check credentials
-        if not username or username == "your.email@example.com":
-            missing.append("ELLI_EMAIL")
-        if not password or password == "your_password":
-            missing.append("ELLI_PASSWORD")
 
         # Only check other fields if require_all is True
         if require_all:
@@ -121,8 +126,6 @@ class Config:
                 ) from e
 
         return cls(
-            username=username,
-            password=password,
             station_id=station_id or "",
             rfid_card_id=rfid_card_id,  # Can be None
             kwh_price_cents=kwh_price,
