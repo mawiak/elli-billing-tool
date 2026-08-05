@@ -15,32 +15,27 @@ class ElliService:
     Wrapper around ElliAPIClient to provide higher-level operations.
     """
 
-    def __init__(self, username: str, password: str):
+    def __init__(self, client: ElliAPIClient):
         """
         Initialize the Elli service.
 
         Args:
-            username: Elli account username.
-            password: Elli account password.
+            client: An already authenticated public elli-client instance.
         """
-        self.username = username
-        self.password = password
-        self.client: ElliAPIClient | None = None
+        self.client: ElliAPIClient | None = client
 
     def __enter__(self) -> "ElliService":
         """
         Context manager entry - logs in to Elli API.
         """
-        self.client = ElliAPIClient()
-        self.client.login(self.username, self.password)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """
         Context manager exit - closes the client connection.
         """
-        if self.client:
-            self.client.close()
+        # AuthenticationService owns the client lifecycle for the whole command.
+        pass
 
     def get_stations(self) -> List[Station]:
         """

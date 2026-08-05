@@ -113,8 +113,9 @@ jobs:
           mkdir -p dist/package
           mkdir -p dist/package/output
           mkdir -p dist/package/template
-          cp dist/elli-billing-tool dist/package/
-          chmod +x dist/package/elli-billing-tool
+          cp dist/elli-billing-tool dist/package/elli-billing-tool.exec
+          chmod +x dist/package/elli-billing-tool.exec
+          packaging/macos/build_callback_helper.sh dist/package
           cp settings.json.example dist/package/settings.json
           cp run.sh dist/package/
           chmod +x dist/package/run.sh
@@ -126,7 +127,7 @@ jobs:
       - name: Create ZIP
         run: |
           cd dist/package
-          zip -r ../macOS_elli_billing_tool.zip *
+          zip -r ../macOS_elli_billing_tool.zip .
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1

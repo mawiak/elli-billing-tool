@@ -1,126 +1,62 @@
 # Elli Billing Tool
 
-Automated charging report generation for company car reimbursement.
+Das Tool lädt monatliche Ladevorgänge von Elli als PDF, liest den Verbrauch aus und erzeugt daraus das vorhandene Abrechnungsformular. Die Elli-Anmeldung findet interaktiv im normalen Systembrowser statt; das Tool verarbeitet oder speichert kein Elli-Passwort.
 
-This tool uses the `elli-client` package to download monthly charging records from your Elli wallbox and automatically generate filled reimbursement forms.
+## Installation für die Entwicklung
 
-## Features
+Voraussetzung ist Python 3.11 oder neuer.
 
-- List all available charging stations and RFID cards
-- Download charging records as PDF for any date range with correct timezone handling
-- Extract total kWh from charging records
-- Automatically fill reimbursement form template with calculated costs
-- German number formatting (commas for decimals)
-- German month names using locale
-
-## Installation
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd elli-billing-tool
-```
-
-2. Create a virtual environment and install dependencies:
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -e .
-```
-
-3. Configure your settings:
-```bash
+source .venv/bin/activate
+python -m pip install -e .
 cp settings.json.example settings.json
-# Edit settings.json with your credentials
 ```
 
-4. Place your reimbursement form template PDF in the `template` folder with the name:
-   `Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf`
+`elli-client>=1.5.0` wird aus PyPI verwendet. Für Client-Entwicklung kann stattdessen vorübergehend `python -m pip install -e ../elli-client` benutzt werden.
 
-## Configuration
+Das eigene PDF-Template muss als `template/Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf` vorliegen.
 
-Copy `settings.json.example` to `settings.json` and fill in your details:
+## Anmeldung und Verwendung
 
-### Required Configuration
-
-- `ELLI_EMAIL`: Your Elli account email
-- `ELLI_PASSWORD`: Your Elli account password
-- `ELLI_STATION_ID`: Your charging station ID (use `list` command to find it)
-- `ELLI_RFID_CARD_ID`: Your RFID card ID (use `list` command to find it)
-- `ELLI_KWH_PRICE_CENTS`: Price per kWh in cents (e.g., "33.33" for 0.3333 EUR)
-- `ELLI_LOCATION`: Location for signature on form (e.g., "Sankt Ingbert")
-
-### Email Configuration
-
-- `EMAIL_SUBJECT`: Email subject line (supports placeholders: {MONTH}, {YEAR}, {NAME})
-- `EMAIL_RECIPIENTS`: Comma-separated list of recipient email addresses
-- `EMAIL_CC`: Comma-separated list of CC email addresses (optional)
-- `EMAIL_NAME`: Your name for email signature
-
-The `settings.json` file uses JSON format with `_comment` fields for documentation. These comment fields are ignored by the tool.
-
-## Usage
-
-### List available stations and RFID cards
+Beim ersten normalen Start öffnet sich die Elli-Seite im Standardbrowser. Dort anmelden, gegebenenfalls Cloudflare Turnstile bestätigen und erlauben, dass der Browser „Elli Login Callback“ öffnet. Danach wird die Abrechnung fortgesetzt.
 
 ```bash
-python -m elli_billing_tool.cli list
+elli-billing-tool                 # Standard: authentifizieren und Abrechnung erzeugen
+elli-billing-tool generate
+elli-billing-tool login
+elli-billing-tool status
+elli-billing-tool logout
+elli-billing-tool list
 ```
 
-This will show all your charging stations and RFID cards with their IDs.
+`status` zeigt ausschließlich `Elli-Konto lokal verbunden: ja/nein`. `logout` löscht nur den lokalen Refresh-Token; es behauptet keine serverseitige Abmeldung. Bei weiteren Starts wird der Refresh-Token erneuert und eine mögliche Rotation sofort gespeichert. Nur wenn Elli eine erneute Anmeldung verlangt, wird der alte Token gelöscht und der Browser erneut geöffnet. Temporäre Netzwerkfehler löschen ihn nicht.
 
-### Generate filled reimbursement form
+## Konfiguration
 
-Generate form for last month (default):
+`settings.json` enthält weiterhin Station, optionale RFID-Karte, Strompreis, Ort, Zeitraum und Maildaten. `ELLI_EMAIL` und `ELLI_PASSWORD` sind veraltet, werden ignoriert und bei sicher möglicher Migration entfernt. Das Tool fragt kein Elli-Passwort ab.
+
+## Lokale Tokens und Datenschutz
+
+Der Refresh-Token liegt unter macOS im Schlüsselbund und unter Windows im Credential Manager (über `keyring`). Tokens stehen weder in `settings.json` noch im Programmordner und werden nicht ausgegeben. Wenn der Betriebssystem-Schlüsselspeicher nicht verfügbar ist, bricht das Tool verständlich ab.
+
+Ein expliziter Fallback kann für kontrollierte Sonderumgebungen mit `ELLI_BILLING_TOKEN_FALLBACK=file` aktiviert werden. Er schreibt atomisch in das plattformspezifische App-Datenverzeichnis (`~/Library/Application Support/Elli Billing Tool/` bzw. `%LOCALAPPDATA%\Elli Billing Tool\`) und nutzt unter Unix Modus `0600`. Dieser Fallback ist schwächer als Keychain/Credential Manager.
+
+Die Anmeldung läuft ausschließlich auf der Elli-Webseite. Es gibt keinen eingebetteten Browser, CAPTCHA-Bypass, Passwort-POST oder Cloud-Relay; der Callback wird lokal über `127.0.0.1` an den wartenden Prozess weitergereicht.
+
+## macOS
+
+Die Distribution enthält `elli-billing-tool.exec`, `run.sh` und die fensterlose `Elli Login Callback.app`. `run.sh` setzt das Arbeitsverzeichnis und registriert den Helper idempotent bei Launch Services. Unsigned Test-Builds können eine Gatekeeper-Warnung auslösen; dann unter **Datenschutz & Sicherheit → Dennoch öffnen** freigeben. Eine optionale Ad-hoc-Signatur (`ADHOC_SIGN=1`) dient nur lokalen Tests und ersetzt keine Developer-ID-Signierung oder Notarisierung.
+
+## Windows
+
+Beim ersten interaktiven Login registriert das Tool seine tatsächlich laufende EXE unter `HKEY_CURRENT_USER\Software\Classes\com.elli.ios.emsp`; Administratorrechte sind nicht nötig. Ein fremder vorhandener Handler wird nicht überschrieben. Die interne Form `elli-billing-tool.exe oauth-callback "<URL>"` ist nicht für manuelle Verwendung bestimmt. Unsigned Builds können SmartScreen auslösen.
+
+## Entwicklung und Tests
+
 ```bash
-python -m elli_billing_tool.cli generate
+python -m pytest
+pyinstaller elli-billing-tool.spec
 ```
 
-Generate for specific date range:
-```bash
-python -m elli_billing_tool.cli generate --start-date 2025-11-01 --end-date 2025-11-30
-```
-
-This will:
-1. Download the charging records PDF from Elli
-2. Extract the total kWh consumption
-3. Calculate the reimbursement amount
-4. Fill the template PDF with:
-   - Month name (in German)
-   - Total kWh (with German decimal formatting)
-   - Total amount in EUR (with German decimal formatting)
-   - Current date and location
-5. Save both PDFs to `output/YYYY/MM/`
-6. Open your email client with pre-filled email (recipients, CC, subject, body)
-7. Open the output folder so you can drag & drop the PDFs into the email
-
-**Note:** The tool automatically converts dates to UTC timestamps to ensure all charging sessions are captured, including those started late in the evening.
-
-## Development
-
-The project structure:
-
-```
-elli-billing-tool/
-├── src/
-│   └── elli_billing_tool/
-│       ├── __init__.py
-│       ├── cli.py              # Command-line interface
-│       ├── config.py           # Configuration management
-│       ├── elli_service.py     # Elli API wrapper
-│       ├── pdf_parser.py       # PDF parsing (extract kWh)
-│       ├── pdf_generator.py    # PDF form generation
-│       └── mail_generator.py   # Email template handling
-├── template/                   # PDF template folder
-│   ├── mail.txt               # Email template
-│   └── Template_Abrechnungsformular-Energiekosten-Firmenwagen-zuhause.pdf  # Form template (add your own)
-├── output/                     # Generated PDFs (gitignored)
-├── settings.json               # Your configuration (gitignored)
-├── settings.json.example      # Example configuration
-├── pyproject.toml             # Project metadata and dependencies
-└── README.md
-```
-
-## License
-
-MIT
+Die PDF-/Berechnungslogik befindet sich unverändert in `pdf_parser.py` und `pdf_generator.py`. Automatisierte Auth-Tests verwenden ausschließlich Mocks und lokale Loopback-Verbindungen.

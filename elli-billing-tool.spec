@@ -1,4 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
+import sys
 
 a = Analysis(
     ['src/elli_billing_tool/__main__.py'],
@@ -13,12 +14,20 @@ a = Analysis(
         'elli_billing_tool.pdf_parser',
         'elli_billing_tool.pdf_generator',
         'elli_billing_tool.mail_generator',
+        'elli_billing_tool.auth',
+        'elli_billing_tool.auth.auth_service',
+        'elli_billing_tool.auth.callback_ipc',
+        'elli_billing_tool.auth.platform_handler',
+        'elli_billing_tool.auth.token_store',
         'elli_client',
         'elli_client.config',
-        'elli_client.service',
-        'elli_client.auth',
         'elli_client.models',
-    ],
+        'keyring',
+    ] + (
+        ['keyring.backends.macOS'] if sys.platform == 'darwin' else
+        ['keyring.backends.Windows', 'win32ctypes.pywin32.pywintypes', 'win32ctypes.pywin32.win32cred']
+        if sys.platform == 'win32' else []
+    ),
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
