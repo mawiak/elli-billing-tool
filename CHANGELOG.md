@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/mawiak/elli-billing-tool/compare/v1.2.0...v1.2.1) (2026-08-06)
+
+
+### Bug Fixes
+
+* enhance macOS callback helper registration and signing process ([1600979](https://github.com/mawiak/elli-billing-tool/commit/1600979ccde84fdd19eb2aa98eb580da8e514887))
+
 # [1.2.0](https://github.com/mawiak/elli-billing-tool/compare/v1.1.1...v1.2.0) (2026-08-05)
 
 
