@@ -46,7 +46,7 @@ Die Anmeldung läuft ausschließlich auf der Elli-Webseite. Es gibt keinen einge
 
 ## macOS
 
-Die Distribution enthält `elli-billing-tool.exec`, `run.sh` und die fensterlose `Elli Login Callback.app`. `run.sh` setzt das Arbeitsverzeichnis und registriert den Helper idempotent bei Launch Services. Unsigned Test-Builds können eine Gatekeeper-Warnung auslösen; dann unter **Datenschutz & Sicherheit → Dennoch öffnen** freigeben. Eine optionale Ad-hoc-Signatur (`ADHOC_SIGN=1`) dient nur lokalen Tests und ersetzt keine Developer-ID-Signierung oder Notarisierung.
+Die Distribution enthält `elli-billing-tool.exec`, `run.sh` und die fensterlose `Elli Login Callback.app`. `run.sh` setzt das Arbeitsverzeichnis, meldet konkurrierende lokale Registrierungen für das Elli-Callback-Scheme sichtbar ab und registriert danach den mitgelieferten Helper idempotent bei Launch Services. Dabei werden keine App-Dateien gelöscht. Der Build versiegelt den Helper mit einer reproduzierbaren Ad-hoc-Signatur, damit das App-Bundle intern konsistent ist. Test-Builds können trotzdem eine Gatekeeper-Warnung auslösen; dann unter **Datenschutz & Sicherheit → Dennoch öffnen** freigeben. Die Ad-hoc-Signatur ersetzt keine Developer-ID-Signierung oder Notarisierung.
 
 ## Windows
 
